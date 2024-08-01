@@ -1,0 +1,442 @@
+---
+title: "Untitled"
+format: html
+---
+
+## Quarto
+
+Quarto enables you to weave together content and executable code into a finished document. To learn more about Quarto see <https://quarto.org>.
+
+## Running Code
+
+When you click the **Render** button a document will be generated that includes both content and the output of embedded code. You can embed code like this:
+
+```{r}
+library(tidyverse)
+library(reticulate)
+
+
+py$df %>%
+  rename(Type = `0`, Value = `1`) %>%
+  pivot_wider()  %>%
+  mutate(Value = map2(Type, Value, function(x,y) {}))
+         
+options(repos = c(
+  jameshwade = "https://jameshwade.r-universe.dev",
+  CRAN = "https://cloud.r-project.org"
+))
+# Download and install gpttools in R
+library(fs)
+
+Images<- list(fs::dir_ls("dataset/Faces/Ben_Sewell"))
+
+
+Back = list('opencv', 'retinaface','mtcnn', 'ssd', 'dlib', 'mediapipe', 'yolov8', 'centerface')
+Model = list(py$models)
+Dist = list('euclidean', 'cosine', 'euclidean_l2')
+
+Norm = list("Base", "Raw", "Facenet", "Facenet2018", "VGGFace", "VGGFace2", "ArcFace")
+
+Model_Verify<- expand_grid(Back, Model, Dist, Norm, Images = Images[[1]]) %>%
+  mutate(Results = pmap(list(Back, Model, Dist, Norm, Images), function(x,y,z,a,i) {
+    py$DeepFace$verify("Test/IMG_8031.jpeg",img2_path = i, model_name = y, distance_metric = z, detector_backend = x, enforce_detection = FALSE)
+  }))
+
+
+```
+
+You can add options to executable code like this
+
+```{python}
+from siuba import *
+from siuba.dply.vector import row_number, n
+from deepface import DeepFace
+import cv2 
+import matplotlib.pyplot as plt 
+import pandas as pd
+from imutils import paths
+import os
+from great_tables import GT
+
+img = cv2.imread("/Users/benjaminsewell/Documents/Python/FacialRecognition/facial_recognition/dataset/Faces/Ben_Sewell/IMG_7217.jpeg")
+
+plt.imshow(img[:,:,::-1])
+plt.show()
+
+# our images are located in the dataset folder
+print("[INFO] start processing faces...")
+imagePaths = list(paths.list_images("dataset/Faces/Ben_Sewell"))
+
+# initialize the list of known encodings and known names
+knownEncodings = []
+knownNames = []
+name = []
+Emo = []
+result = []
+
+for (i, imagePath) in enumerate(imagePaths):
+	name.append(imagePath.split(os.path.sep)[-2])
+	img = cv2.imread(imagePath)
+	result.append(DeepFace.analyze(img,  actions = ['emotion'], enforce_detection = False))
+	Emo.append(CleanEmotion(result[i],name[i]))
+  
+# print result 
+pd.DataFrame(result[0])
+
+def CleanEmotion(Data, Name):
+  df = pd.json_normalize(result)
+  dfs = pd.concat([pd.Series(name*df.shape[0], name = "Name"), df], axis = 1)
+  df = dfs.melt()
+  df.reset_index(drop=True, inplace=True)
+  return(df)
+
+
+
+name = []
+Emo = []
+result = []
+
+for (i, imagePath) in enumerate(imagePaths):
+  print(f"{i} and {imagePath}")
+	# extract the person name from the image path
+	name.append(imagePath.split(os.path.sep)[-2])
+	img = cv2.imread("dataset/Faces/Ben_Sewell/IMG_6682.jpeg")
+	result.append(DeepFace.analyze(img,  detector_backend = 'retinaface'))
+	Emo.append(CleanEmotion(result[i],name[i]))
+  
+# print result 
+pd.DataFrame(result[0])
+
+def CleanEmotion(Data, Name):
+  df = pd.json_normalize(Data)
+  dfs = pd.concat([pd.Series(Name, name = "Name"), df], axis = 1)
+  dfs.reset_index(drop=False, inplace=True)
+  return(dfs)
+Finder = DeepFace.find(img_path = "dataset/Faces/Ben_Sewell/IMG_0811.jpeg", db_path = "dataset/Faces/", model_name = "Facenet512", distance_metric = "euclidean", detector_backend="yolov8", align = True)
+
+Test = pd.concat(Emo,ignore_index=True)
+
+[pd.concat(E) for E in Emo]
+
+from great_tables import GT, md, html
+
+Test
+
+TBL = (
+    GT(Test)
+    .tab_stub(rowname_col = "Name", 
+    .cols_hide("index")
+    .fmt_number(columns = ['face_confidence', 'emotion.angry','emotion.disgust', 'emotion.fear', 'emotion.happy', 'emotion.sad','emotion.surprise', 'emotion.neutral'],decimals = 2)
+    .cols_align("center")
+    .data_color(columns = ['face_confidence', 'emotion.angry','emotion.disgust', 'emotion.fear', 'emotion.happy', 'emotion.sad','emotion.surprise', 'emotion.neutral'], palette = "cividis", domain = [100,0])
+)
+
+GT.show(GT(DF))
+Test.columns
+```
+
+```{python}
+DF = pd.DataFrame(Finder[0])
+
+DF = DF >>arrange(_.distance) >> mutate(Person = _.identity.str.split("/").str[-2]) >> select(_.Person, _.distance, _[0:10]) >> collect()
+
+TBL = (
+    GT(Test)
+    .tab_stub(rowname_col = "Name", 
+    .cols_hide("index")
+    .fmt_number(columns = ['face_confidence', 'emotion.angry','emotion.disgust', 'emotion.fear', 'emotion.happy', 'emotion.sad','emotion.surprise', 'emotion.neutral'],decimals = 2)
+    .cols_align("center")
+    .data_color(columns = ['face_confidence', 'emotion.angry','emotion.disgust', 'emotion.fear', 'emotion.happy', 'emotion.sad','emotion.surprise', 'emotion.neutral'], palette = "cividis", domain = [100,0])
+)
+
+TBL2 = (
+  GT(DF)
+  .tab_stubhead(label = "Person")
+  .tab_options(column_labels_font_size = "18px")
+  .tab_stub(rowname_col = "Person")
+  .cols_hide("hash")
+  .fmt_number(columns = ['distance'], decimals = 2)
+  .cols_align("center")
+)
+GT.show(TBL2)
+```
+
+The `echo: false` option disables the printing of code (only output is displayed).
+```{r}
+library(reticulate)
+library(tidyverse)
+py$Emo %>%
+  data.table::rbindlist(fill = TRUE)
+
+```
+
+```{python}
+# Train multiple images per person
+# Find and recognize faces in an image using a SVC with scikit-learn
+
+
+import face_recognition
+from sklearn import svm
+import os
+
+# Training the SVC classifier
+
+# The training data would be all the face encodings from all the known images and the labels are their names
+encodings = []
+names = []
+
+# Training directory
+train_dir = os.listdir('photo/')
+
+# Loop through each person in the training directory
+for person in train_dir:
+    pix = os.listdir("photo/" + person)
+
+    # Loop through each training image for the current person
+    for person_img in pix:
+        # Get the face encodings for the face in each image file
+        face = face_recognition.load_image_file("photo/" + person + "/" + person_img)
+        face = np.resize(face, (128,128,3))
+        face_bounding_boxes = face_recognition.face_locations(face, model = "cnn")
+
+        #If training image contains exactly one face
+        if len(face_bounding_boxes) == 1:
+            face_enc = face_recognition.face_encodings(face)[0]
+            # Add face encoding for current image with corresponding label (name) to the training data
+            encodings.append(face_enc)
+            names.append(person)
+        else:
+            print(person + "/" + person_img + " was skipped and can't be used for training")
+
+# Create and train the SVC classifier
+clf = svm.SVC(gamma='scale')
+clf.fit(encodings,names)
+
+# Load the test image with unknown faces into a numpy array
+test_image = face_recognition.load_image_file('Test/IMG_8031.jpeg')
+
+# Find all the faces in the test image using the default HOG-based model
+face_locations = face_recognition.face_locations(test_image)
+no = len(face_locations)
+print("Number of faces detected: ", no)
+
+# Predict all the faces in the test image using the trained classifier
+print("Found:")
+for i in range(no):
+    test_image_enc = face_recognition.face_encodings(test_image)[i]
+    name = clf.predict([test_image_enc])
+    print(*name)
+    
+import numpy as np
+np.resize(test_image, (128,128,3))
+test_image.resize((128,128,3))
+```
+
+```{python}
+import dlib
+import scipy.misc
+import numpy as np
+import os
+# Get Face Detector from dlib
+# This allows us to detect faces in images
+face_detector = dlib.get_frontal_face_detector()
+# Get Pose Predictor from dlib
+# This allows us to detect landmark points in faces and understand the pose/angle of the face
+shape_predictor = dlib.shape_predictor('shape_predictor_68_face_landmarks.dat')
+# Get the face recognition model
+# This is what gives us the face encodings (numbers that identify the face of a particular person)
+face_recognition_model = dlib.face_recognition_model_v1('dlib_face_recognition_resnet_model_v1.dat')
+# This is the tolerance for face comparisons
+# The lower the number - the stricter the comparison
+# To avoid false matches, use lower value
+# To avoid false negatives (i.e. faces of the same person doesn't match), use higher value
+# 0.5-0.6 works well
+TOLERANCE = 0.6
+```
+
+```{python}
+import imageio
+# This function will take an image and return its face encodings using the neural network
+def get_face_encodings(path_to_image):
+    # Load image using scipy
+    image = imageio.imread(path_to_image)
+    # Detect faces using the face detector
+    detected_faces = face_detector(image, 1)
+    # Get pose/landmarks of those faces
+    # Will be used as an input to the function that computes face encodings
+    shapes_faces = [shape_predictor(image, face) for face in detected_faces]
+    # For every face detected, compute the face encodings
+    return [np.array(face_recognition_model.compute_face_descriptor(image, face_pose, 1)) for face_pose in shapes_faces]
+```
+
+
+```{python}
+# This function takes a list of known faces
+
+def compare_face_encodings(known_faces, face):
+    # Finds the difference between each known face and the given face (that we are comparing)
+    # Calculate norm for the differences with each known face
+    # Return an array with True/Face values based on whether or not a known face matched with the given face
+    # A match occurs when the (norm) difference between a known face and the given face is less than or equal to the TOLERANCE value
+    return (np.linalg.norm(known_faces - face, axis=1) <= TOLERANCE)
+```
+
+```{python}
+# This function returns the name of the person whose image matches with the given face (or 'Not Found')
+def find_match(known_faces, names, face):
+    matches = compare_face_encodings(known_faces, face)
+    count = 0
+    for match in matches:
+        if match:
+            return names[count]
+        count += 1
+    return 'Not Found'
+```
+
+```{python}
+
+from pathlib import Path
+dir(Path)
+# Get path to all the known images
+# Filtering on .jpg extension - so this will only work with JPEG images ending with .jpg
+image_filenames = os.listdir('photo/')
+# Sort in alphabetical order
+image_filenames = sorted(image_filenames)
+# Get full paths to images
+paths_to_images = ['photo/' + x for x in image_filenames]
+# List of face encodings we have
+face_encodings = []
+# Loop over images to get the encoding one by one
+for path_to_image in paths_to_images:
+    files = os.listdir(path_to_image)
+    for file in files:
+      file = path_to_image + "/" + file
+      # Get face encodings from the image
+      DeepFace.find()
+      # Make sure there's exactly one face in the image
+      if len(file) != 1:
+          print("Please change image: " + file + " - it has " + str(len(file)) + " faces; it can only have one")
+          exit()
+      # Append the face encoding found in that image to the list of face encodings we have
+      face_encodings.append(get_face_encodings(file)[0])
+
+```
+```{python}
+KEEP = DeepFace.find(img_path = 'Test/IMG_8031.jpeg', db_path = 'dataset/Faces', model_name = 'Facenet', distance_metric = 'euclidean', detector_backend = 'mtcnn', enforce_detection = False)
+
+
+KEEP_TBL = pd.concat(KEEP)
+
+TABLE = (
+  GT(KEEP_TBL)
+  .show()
+)
+
+STREAM = DeepFace.stream(db_path = 'dataset/Faces', model_name = 'Facenet', distance_metric = 'euclidean', source = "rtsp://packstician:Shiny680@10.0.0.182:8888/stream1")
+```
+
+```{python}
+
+ANA = DeepFace.analyze(img_path = 'Test/IMG_8031.jpeg')
+
+DeepFace.stream(db_path = 'dataset/Faces', model_name = 'Facenet', distance_metric = 'euclidean', source = "rtsp://packstician:Shiny680@10.0.0.182:8554/stream1", time_threshold = 300, frame_threshold = 10)
+
+ANA2 = pd.json_normalize(ANA[0])
+
+GT(ANA2).show()
+
+cap = cv2.VideoCapture("rtsp://packstician:Shiny680@10.0.0.182:8554/stream3") 
+
+
+# Use each model to verify that the two images are the same person
+
+models = [
+  "VGG-Face", 
+  "Facenet", 
+  "Facenet512", 
+  "OpenFace", 
+  "DeepID", 
+  "ArcFace", 
+  "Dlib", 
+  "SFace",
+  "GhostFaceNet",
+]
+
+backend = [
+  'opencv',
+  'retinaface',
+  'mtcnn',
+  'ssd',
+  'dlib',
+  'mediapipe',
+  'yolov8',
+  'centerface'
+]
+
+RES = []
+
+for model in models:
+  print(f"Using model: {model}")
+  time.sleep(1)
+  RES.append(DeepFace.verify("Test/IMG_8031.jpeg",img2_path = "dataset/Faces/Ben_Sewell/IMG_6682.jpeg", model_name = model, distance_metric = 'euclidean', detector_backend = "dlib", enforce_detection = False))
+
+RES = [DeepFace.verify("Test/IMG_8031.jpeg",img2_path = "dataset/Faces/Ben_Sewell/IMG_6682.jpeg", model_name = x, distance_metric = 'euclidean', detector_backend = 'mtcnn', enforce_detection = False) for x in models]
+
+VERIFIED2 = pd.DataFrame(RES)
+
+from siuba import *
+
+VERIFY2 = (
+  VERIFIED2  >> mutate(Percent = ((_.distance/_.threshold)*100))
+)
+
+#normalize the distance veriable in the dataset
+VERIFY = pd.json_normalize(VERIFIED.distance)
+
+def normalizer(x):
+  return((x - min(x))/(max(x) - min(x)))
+
+from sklearn.preprocessing import MinMaxScaler
+
+scaler = MinMaxScaler()
+
+VERIFIED >> mutate(distance = scaler.fit_transform(VERIFIED[["distance"]]))
+
+TBL = (
+  GT(VERIFY2)
+  .opt_table_outline()
+  .show()
+)
+
+TBL
+
+
+MATCH = []
+
+for pic in os.listdir("dataset/Faces/Ben_Sewell"):
+  print(pic)
+  MATCH.append(DeepFace.verify("Test/IMG_8031.jpeg",img2_path = f"dataset/Faces/Ben_Sewell/{pic}", model_name = "Facenet", distance_metric = 'euclidean', detector_backend = 'ssd', enforce_detection = False))
+
+
+MATCH_TBL = pd.DataFrame(MATCH)
+
+
+
+
+
+
+
+
+(MATCH)
+()
+```
+
+```{r}
+library(reticulate)
+dp<- import("deepface",convert = T,as = "dp")
+
+
+py$VERIFIED
+
+```
+
