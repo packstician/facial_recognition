@@ -1,3 +1,3 @@
 from deepface import DeepFace
 
-DeepFace.stream(db_path = 'dataset/Faces', model_name = 'VGG-Face', distance_metric = 'euclidean', source = "rtsp://packstician:Shiny680@10.0.0.182:8554/stream1", time_threshold = 10, frame_threshold = 5)
+DeepFace.stream(db_path = '/Users/benjaminsewell/Documents/Python/FacialRecognition/facial_recognition/dataset/Faces/', model_name = 'GhostFaceNet',detector_backend="retinaface" ,distance_metric = 'cosine',source="rtsp://packstician:Shiny680@10.0.0.182:8554/stream1", enable_face_analysis = True)

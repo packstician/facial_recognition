@@ -1,0 +1,75 @@
+---
+title: "Untitled"
+format: html
+engine: jupyter
+
+---
+
+## Quarto
+
+Quarto enables you to weave together content and executable code into a finished document. To learn more about Quarto see <https://quarto.org>.
+
+```{python}
+from deepface import DeepFace
+# DEMO = DeepFace.analyze("/Users/benjaminsewell/Documents/Python/FacialRecognition/facial_recognition/dataset/Faces/Bailey_Belanger/IMG_8194.jpg")
+
+```
+## Running Code
+
+When you click the **Render** button a document will be generated that includes both content and the output of embedded code. You can embed code like this:
+
+You can add options to executable code like this 
+
+```{python}
+from deepface import DeepFace
+import cv2 
+#import matplotlib.pyplot as plt 
+import pandas as pd
+from imutils import paths
+import os
+
+def CleanEmotion(Data, Name):
+  df = pd.json_normalize(result)
+  df = df.melt()
+  df = pd.concat([pd.Series(name*df.shape[0], name = "Name"), df], axis = 1)
+  df.reset_index(drop=True, inplace=True)
+  return(df)
+
+# our images are located in the dataset folder
+print("[INFO] start processing faces...")
+imagePaths = list(paths.list_images("photo"))
+
+# initialize the list of known encodings and known names
+knownEncodings = []
+knownNames = []
+name = []
+Emo = []
+result = []
+
+for (i, imagePath) in enumerate(imagePaths):
+  print(f"{i} and {imagePath}")
+  # extract the person name from the image path
+  name.append(imagePath.split(os.path.sep)[-2])
+  img = cv2.imread(imagePath)
+  result.append(DeepFace.analyze(img,  actions = ['emotion'], enforce_detection=False))
+  Emo.append(CleanEmotion(result[i],name[i]))
+  
+
+pd.json_normalize(DEMO)
+```
+c
+```{python}
+import cv2
+
+cap = cv2.VideoCapture("rtsp://packstician:Shiny680@10.0.0.182:8554/stream3") 
+
+img = cv2.imread("/Users/benjaminsewell/Downloads/logo.png")
+```
+
+```{python}
+img = cv2.imread("/Users/benjaminsewell/Downloads/logo.png")
+img2 = cv2.resize(img, (200, 28))
+cv2.imwrite("logo.png", img2)
+```
+
+The `echo: false` option disables the printing of code (only output is displayed).

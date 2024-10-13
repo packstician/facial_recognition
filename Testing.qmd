@@ -47,7 +47,7 @@ Model_Verify<- expand_grid(Back, Model, Dist, Norm, Images = Images[[1]]) %>%
 
 You can add options to executable code like this
 
-```{python}
+```{python, echo=TRUE}
 from siuba import *
 from siuba.dply.vector import row_number, n
 from deepface import DeepFace
@@ -159,6 +159,23 @@ TBL2 = (
   .cols_align("center")
 )
 GT.show(TBL2)
+
+def get_audio():
+  
+  r = sr.Recognizer()
+	mic = sr.Microphone(device_index=2,15)
+	with mic as source:
+		audio = r.listen(source)
+		said = ""
+
+		try:
+		    said = r.recognize_google(audio)
+		    print(said)
+		except Exception as e:
+		    print("Exception: " + str(e))
+
+	return said
+
 ```
 
 The `echo: false` option disables the printing of code (only output is displayed).
@@ -339,7 +356,7 @@ STREAM = DeepFace.stream(db_path = 'dataset/Faces', model_name = 'Facenet', dist
 
 ANA = DeepFace.analyze(img_path = 'Test/IMG_8031.jpeg')
 
-DeepFace.stream(db_path = 'dataset/Faces', model_name = 'Facenet', distance_metric = 'euclidean', source = "rtsp://packstician:Shiny680@10.0.0.182:8554/stream1", time_threshold = 300, frame_threshold = 10)
+DeepFace.stream(db_path = 'dataset/Faces', model_name = 'DeepID', distance_metric = 'euclidean', source = "rtsp://packstician:Shiny680@10.0.0.182:8554/stream1", time_threshold = 300, frame_threshold = 10)
 
 ANA2 = pd.json_normalize(ANA[0])
 

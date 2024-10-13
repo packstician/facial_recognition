@@ -1,0 +1,192 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+
+This is an [R Markdown](http://rmarkdown.rstudio.com) Notebook. When you execute code within the notebook, the results appear beneath the code. 
+
+Try executing this chunk by clicking the *Run* button within the chunk or by placing your cursor inside it and pressing *Cmd+Shift+Enter*. 
+
+```{python}
+import speech_recognition as sr
+r = sr.Recognizer()
+sr.Microphone.list_working_microphones()
+mic = sr.Microphone()
+
+with mic as source:
+  audio = r.listen(source, timeout=10)
+
+PASS = r.recognize_google(audio)
+
+PASS.upper() == "GOLF UNIFORM NOVEMBER SIERRA"
+
+```
+
+Add a new chunk by clicking the *Insert Chunk* button on the toolbar or by pressing *Cmd+Option+I*.
+```{python}
+import os
+import time
+from playsound import playsound
+import speech_recognition as sr
+from gtts import gTTS
+
+# Function to play a sound file
+def play_sound(file_path):
+    if os.path.exists(file_path):
+        playsound(file_path)
+    else:
+        print(f"File not found: {file_path}")
+
+# Play the audio file using the play_sound function
+audio_file_path = "/Users/benjaminsewell/Documents/Python/FacialRecognition/facial_recognition/voice.mp3"
+play_sound(audio_file_path)
+
+
+
+def speak(text):
+    tts = gTTS(text=text, lang="en")
+    filename = "voice.mp3"
+    tts.save(filename)
+    play(filename)
+    
+def get_audio():
+    r = sr.Recognizer()
+    with sr.Microphone(device_index=0) as source:
+        audio = r.listen(source)
+        said = ""
+
+        try:
+            said = r.recognize_google(audio)
+            print(said)
+        except Exception as e:
+            print("Exception: " + str(e))
+
+    return said
+
+text = get_audio()
+
+sr.Microphone.list_working_microphones()
+
+if "hey" in text:
+    speak("hello, how are you?")
+elif "what is your name" in text:
+    speak("My name is Tim")    
+
+```
+
+When you save the notebook, an HTML file containing the code and output will be saved alongside it (click the *Preview* button or press *Cmd+Shift+K* to preview the HTML file). 
+```{python}
+face_image = cv2.resize(frame, (48,48))
+face_image = cv2.cvtColor(face_image, cv2.COLOR_BGR2GRAY)
+face_image = np.reshape(face_image, [1, face_image.shape[0], face_image.shape[1], 1])
+
+from deepface import DeepFace
+
+for i in range(len(imagePaths[1:len(imagePaths)])):
+  DEM = DeepFace.analyze(imagePaths[i])
+  DF2 = pd.json_normalize(DEM)
+  DF = pd.concat([DF,DF2])
+  
+DF.reset_index()
+DEMO = DeepFace.analyze("./photo/Mason_Bushyeager/IMG_8144.jpg")
+
+[print(x) for x in imagePaths if "Mason" in x]
+
+import json
+type(DEMO)
+DEMO = DEMO[0]
+DEMO.keys()
+import pandas as pd
+DF.columns
+DF = pd.json_normalize(DEMO)
+DF.index([imagePaths[0]])
+from great_tables import GT
+PLOT = GT(DF)
+PLOT.show()
+del(DF)
+```
+
+The preview shows you a rendered HTML copy of the contents of the editor. Consequently, unlike *Knit*, *Preview* does not run any R code chunks. Instead, the output of the chunk when it was last run in the editor is displayed.
+```{r}
+library(reticulate)
+library(tidyverse)
+
+NAMES<- str_split(py$imagePaths, "/",simplify = T)[,3]
+
+py$DF %>%
+  arrange(age,face_confidence)
+```
+
+```{python}
+
+import nmap
+
+# Create an Nmap object
+nm = nmap.PortScanner()
+
+# Specify the network address and subnet mask
+network = "192.168.0.1/24"
+
+# Perform a scan for all devices on the network
+nm.scan(network, arguments='-sS')
+
+# Print out information about each device found
+for host in nm.all_hosts():
+  print(f"Host: {host}")
+  print(f"State: {nm[host].state()}")
+  for proto in nm[host].all_protocols():
+    print(f"{proto} protocol:")
+    for port in nm[host][proto].keys():
+      if 'tcp' in proto and not nm[host][proto][port]['excluded']:
+        print(f"  Port: {port}, State: {nm[host][proto][port]['state']}")
+    
+
+```
+
+```{python}
+def callback(recognizer, audio):
+  try:
+    SPEECH = recognizer.recognize_google(audio)
+    if "HEY R" not in SPEECH.upper():
+      play("This is your mac")
+      return SPEECH
+  except sr.UnknownValueError:
+    print("Google Speech Recognition could not understand audio")
+    
+def callback(recognizer, audio):
+  try:
+    SPEECH = recognizer.recognize_google(audio)
+    if "HEY R" not in SPEECH.upper():
+      play("This is your mac")
+      return SPEECH
+  except sr.UnknownValueError:
+    print("Google Speech Recognition could not understand audio")
+    
+def callback(recognizer, audio):
+  try:
+    SPEECH = recognizer.recognize_google(audio)
+  except sr.UnknownValueError:
+    print("Google Speech Recognition could not understand audio")
+    if "HEY R" not in SPEECH.upper():
+      speak("This is your mac")
+      return(SPEECH)
+    else:
+      print("Problem")
+    
+
+r = sr.Recognizer()
+m = sr.Microphone()
+with m as source:
+    r.adjust_for_ambient_noise(source)  # we only need to calibrate once, before we start listening
+
+# start listening in the background (note that we don't have to do this inside a `with` statement)
+stop_listening = r.listen_in_background(m, callback)
+# `stop_listening` is now a function that, when called, stops background listening
+
+# do some unrelated computations for 5 seconds
+for _ in range(50): time.sleep(0.1)  # we're still listening even though the main thread is doing other things
+
+# calling this function requests that the background listener stop listening
+stop_listening(wait_for_stop=False)
+```
+
