@@ -1,0 +1,248 @@
+---
+jupyter: python3
+---
+
+```{python}
+from deepface import DeepFace
+image_path <- "/Users/benjaminsewell/Documents/Python/FacialRecognition/facial_recognition/dataset/Faces/Nate_Sewell/IMG_8198.HEIC"
+DEMO = DeepFace.analyze(
+  "/Users/benjaminsewell/Documents/Python/FacialRecognition/facial_recognition/dataset/Faces/Nate_Sewell/IMG_8198.png", 
+  detector_backend= 'dlib',enforce_detection=False)
+image = Image.open(image_path)    
+
+import os
+from PIL import Image
+import pillow_heif
+
+# set the directory path containing the HEIC files
+directory = '/Users/benjaminsewell/Documents/Python/FacialRecognition/facial_recognition/dataset/Faces/Nate_Sewell/'
+
+help(os.listdir)
+Files = []
+# loop through all files in the directory
+for filename in os.listdir(directory):
+     # check if the file is in HEIC format
+    if filename.endswith(".HEIC"):
+        # create an Image object from the HEIC file
+        filepath = os.path.join(directory, filename)
+        Files = filepath
+        print("Converting:", filepath)
+        heif_file = pillow_heif.read_heif(filepath)
+        image = Image.frombytes(
+            heif_file.mode,
+            heif_file.size,
+            heif_file.data,
+            "raw",
+        )
+        new_filename = os.path.splitext(filename)[0] + ".png"
+        new_filepath = os.path.join(directory, new_filename)
+
+        image.save(new_filepath, format("png"))
+
+DF=CleanEmotion1(DEMO[1], "Bailey_Belanger")
+
+CLEAN = CleanEmotion1(DEMO ,"Nate_Sewell")
+DF.merge
+CLEAN.
+```
+
+```{python}
+from PIL import Image
+
+import matplotlib.pyplot as plt
+import matplotlib.patches as patches
+
+# Load the image
+image_path = "/Users/benjaminsewell/Documents/Python/FacialRecognition/facial_recognition/dataset/Faces/Bailey_Belanger/IMG_8194.jpg"
+image = Image.open(image_path)
+DAT=[]
+DF=[]
+for i in range(len(DEMO)):
+  DF<- CleanEmotion1(DEMO[i], "Bailey_Belanger")
+  if i == 0:
+    DAT[i] = DF
+  else:
+    DATA=pd.concat(DAT, DF)
+```
+
+```{python}
+# Create a figure and axis
+fig, ax = plt.subplots(1)
+ 
+
+# Display the image
+ax.imshow(image)
+```
+
+```{python}
+
+
+
+# Extract the bounding box and emotion data from DEMO
+bounding_box = DEMO['region']
+emotion = DEMO['dominant_emotion']
+DEMO
+# Create a rectangle patch for the bounding box
+rect = patches.Rectangle((bounding_box['x'], bounding_box['y']), bounding_box['w'], bounding_box['h'], linewidth=2, edgecolor='r', facecolor='none')
+
+# Add the rectangle patch to the Axes
+ax.add_patch(rect)
+
+# Annotate the image with the dominant emotion
+plt.text(bounding_box['x'], bounding_box['y'] - 10, emotion, color='red', fontsize=12, weight='bold')
+
+# Show the plot
+plt.show()
+```
+
+
+
+
+
+```{python}
+DEMO
+
+
+```
+
+```{python}
+import pandas as pd
+import numpy as np
+
+
+
+def CleanEmotion1(Data, Name):
+  df = pd.json_normalize(Data)
+  dfs = pd.concat([pd.Series(Name, name = "Name"), df], axis = 1)
+  dfs.reset_index(drop=False, inplace=True)
+  return(dfs)
+
+def CleanEmotion2(Data, Name):
+  df = pd.json_normalize(result)
+  dfs = pd.concat([pd.Series(Name*df.shape[0], name = "Name"), df], axis = 1)
+  df = dfs.melt()
+  df.reset_index(drop=True, inplace=True)
+  return(df)
+
+def CleanEmotion3(Data, Name):
+  df = pd.json_normalize(result)
+  df = df.melt()
+  df = pd.concat([pd.Series(Name*df.shape[0], name = "Name"), df], axis = 1)
+  df.reset_index(drop=True, inplace=True)
+  return(df)
+```
+
+```{python}
+from siuba import *
+
+EMO = CleanEmotion1(DEMO, "Bailey_Belanger")
+
+@verb_dispatch(pd.DataFrame)
+def head(__data, n = 5):
+    return __data.head(n)
+
+from great_tables import GT
+PLOT = GT(DF)
+
+GT(EMO)
+
+```
+
+```{r}
+library(reticulate)
+library(tidyverse)
+library(magick)
+
+py$DEMO %>% tibble()
+
+EMO_REG<- py$EMO %>%
+  mutate(xmin = region.x,
+         xmax = region.x + region.w,
+         ymin = region.y,
+         ymax = region.y + region.h)
+ncol(BAY)  
+
+BAY<- image_read("/Users/benjaminsewell/Documents/Python/FacialRecognition/facial_recognition/dataset/Faces/Bailey_Belanger/IMG_8194.jpg")
+image_ggplot(BAY) +
+  ggplot2::geom_rect(aes(xmin=EMO_REG$xmin, xmax=EMO_REG$xmax, ymin=EMO_REG$ymin, ymax=EMO_REG$ymax),fill = "transparent", color = "black", linewidth = 2) +
+  geom_label(data = COORD, aes(label = str_c(Label,collapse = "\n") , y = 580-min(Y) , x = min(X)-325),size = 3)
+ 
+ dCOORD <-tibble(Xpoints = EMO_REG$xmin:EMO_REG$xmax) %>% 
+  mutate(ID = row_number(), .before = Xpoints,
+         Group = case_when(
+           Xpoints >= 409 & Xpoints < 459 ~ 1,
+           Xpoints >= 459 & Xpoints < 509 ~ 2,
+           Xpoints >= 509 & Xpoints < 559 ~ 3,
+           Xpoints >= 559 & Xpoints < 609 ~ 4,
+           Xpoints >= 609 & Xpoints < 659 ~ 5,
+           Xpoints >= 709 & Xpoints < 759 ~ 6,
+           Xpoints >= 809 & Xpoints < 859 ~ 7,
+           Xpoints >= 859 & Xpoints < 909 ~ 8,
+           Xpoints >= 909 & Xpoints < 959 ~ 9,
+           Xpoints >= 959 & Xpoints < 991 ~ 10,
+         ))
+  COORD<- COORD %>% 
+    split(cut(1:583,6)) %>%
+    map2(., 1:6, ~mutate(.x, Group = .y)) %>%
+    list_rbind() %>%
+    mutate(X = 991) %>%
+    group_by(Group) %>% 
+    summarise(Y = quantile(Xpoints, probs = .0),
+              X = max(X),
+           Xmin = min(X),
+           Ymin = min(Y))
+
+Coordinates<- COORD
+COORD<-COORD %>%
+  mutate(Label = map_chr(1:ncol(EMO_REG[2:7]), ~str_c(str_to_title(names(EMO_REG)[.x]), str_to_title(as.character(EMO_REG[,.x])), sep = ": ")))# 
+quantile(Coordinates$Y , c(.25,.5,.75),na.rm = T)
+mean()
+py$CleanEmotion3(Analyze1, "Nate")
+
+Analyze_Demo<- function(Analyze_File) {
+  require(reticulate)
+  require(tidyverse)
+  DP<- py$DeepFace$analyze(Analyze_File,detector_backend = 'dlib', enforce_detection = F,align=T,expand_percentage=T)
+  Normalized<- py$pd$json_normalize(DP) %>% pivot_longer(cols = everything(),values_transform = as.character)
+  return(Normalized)
+}
+
+ANAL<- map(FILES, ~Analyze_Demo(.x)) 
+ANAL<- map(1:length(ANAL), ~mutate(ANAL, ID = .x)) 
+map2(ANAL,1:length(ANAL), ~.x %>% mutate(ID = .y,.before=1)) %>%
+  list_rbind() %>%
+  arrange(name)
+ANAL[[1]]
+aFILES<- fs::dir_ls(py$directory, recurse = TRUE,type = "file",glob = "*png")
+Analyze1<- py$DeepFace$analyze(FILES[1],detector_backend = 'dlib', enforce_detection = F,align=T,expand_percentage=T)
+Analyze %>% as_tibble() %>% unnest_longer(col = everything()) %>%
+  rename_with(~fs::path_file(.x) %>% fs::path_ext_remove(),.cols = ends_with("png")) %>%
+  dplyr::rowwise() %>%
+  mutate(across(starts_with("IMG"), ~str_flatten(.x, ": ")))
+library(fs)
+NAMES<- str_c("Nate_Sewell", as.character(1:4))
+Analyze %>% 
+  as_tibble() %>%
+  rename_with(.cols = everything(), .fn = ~NAMES) %>%
+  mutate(Row = row_number()) %>%
+  group_(Row) %>%
+  map(~.x,
+  map(names(.),
+      function(x) {
+        Analyze %>% mutate({{x}} := str_c(x, collapse = "\n"))
+      }
+    )
+  ) %>% list_transpose() %>% as_tibble() %>%
+  group_by(Row) %>%
+  unnest_longer(col = everything(),transform = as.character) %>%
+  mutate(Measure = Nate_Sewell1_id,.before = 1,
+         Length = length(Nate_Sewell1)) %>%
+  select(!ends_with("id")) %>%
+  unnest_longer(col = Nate_Sewell1:Nate_Sewell4)
+  
+  jsonlite::fromJSON(Analyze1) 
+  py$pd$json_normalize(Analyze1) %>% pivot_longer(cols = everything(),values_transform = as.character)
+  as_tibble() %>% unnest_longer(col = everything()) %>%
+  rename_with(~fs::path_file(.x) %>% fs::path_ext_remove(),.cols = ends_with("png"))
+```     
+
